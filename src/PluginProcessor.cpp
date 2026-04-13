@@ -2,8 +2,7 @@
 #include "PluginEditor.h"
 
 ChromesthesiaProcessor::ChromesthesiaProcessor()
-    : AudioProcessor (BusesProperties()
-          .withOutput ("Output", juce::AudioChannelSet::stereo(), true))
+    : AudioProcessor (BusesProperties()) // no audio buses — pure MIDI effect
 {
 }
 
@@ -13,8 +12,11 @@ void ChromesthesiaProcessor::releaseResources() {}
 void ChromesthesiaProcessor::processBlock (juce::AudioBuffer<float>& buffer,
                                            juce::MidiBuffer& midiMessages)
 {
-    buffer.clear(); // output silence
+    // MIDI effect: audio buffer is empty, just leave it alone.
+    juce::ignoreUnused (buffer);
 
+    // Inspect MIDI for color updates — do NOT clear the buffer so all
+    // messages pass through unchanged to the instrument downstream.
     for (const auto metadata : midiMessages)
     {
         const auto msg = metadata.getMessage();
