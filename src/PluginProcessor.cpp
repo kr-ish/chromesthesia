@@ -14,8 +14,7 @@ void ChromesthesiaProcessor::releaseResources() {}
 void ChromesthesiaProcessor::processBlock (juce::AudioBuffer<float>& buffer,
                                            juce::MidiBuffer& midiMessages)
 {
-    // Audio effect: pass audio through unchanged.
-    // (Input and output are the same buffer in most hosts.)
+    juce::ignoreUnused (buffer); // audio passes through unchanged
 
     // Inspect MIDI for color updates — do NOT clear the buffer so all
     // messages pass through unchanged to the instrument downstream.
