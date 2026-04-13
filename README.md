@@ -69,12 +69,18 @@ cp -r build/Chromesthesia_artefacts/Release/VST3/Chromesthesia.vst3 \
 
 ## Usage
 
-1. Load **Chromesthesia** on an Instrument track in your DAW (Ableton, Logic, Reaper, etc.)
-2. Connect a MIDI keyboard
-3. In the plugin UI, select your practice display from the **Display** dropdown
-4. Click **Go Fullscreen** — the color window opens on your chosen screen
-5. Play notes. The screen fills instantly with the associated color; releasing a note fades to black over 500ms
-6. Practice daily for 30–60 minutes
+Chromesthesia is a silent instrument — it receives MIDI and drives the color display but produces no audio. Load your actual instrument (synth, sampler, etc.) on one track, and Chromesthesia on a **separate MIDI track** routed to the same MIDI input. Both respond to the keyboard simultaneously.
+
+**Setup (all DAWs):**
+1. Create a MIDI/instrument track for your synth as normal
+2. Create a second MIDI/instrument track and load **Chromesthesia** on it
+3. Set both tracks to receive from the same MIDI input (your keyboard, or "All Ins")
+4. In the Chromesthesia plugin UI, select your practice display from the **Display** dropdown
+5. Click **Go Fullscreen** — the color window opens on your chosen screen
+6. Play notes — the screen fills with the associated color; releasing a note fades to black over ~500ms
+7. Practice daily for 30–60 minutes
+
+You can mute or zero the volume on the Chromesthesia track — it outputs silence regardless.
 
 **Recommended environment:** darkened room, fullscreen on a large monitor at comfortable viewing distance. The research suggests peripheral vision engagement helps with immersive visual conditioning.
 

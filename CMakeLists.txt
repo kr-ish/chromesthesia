@@ -17,14 +17,14 @@ juce_add_plugin(Chromesthesia
     PLUGIN_MANUFACTURER_CODE    KrIs
     PLUGIN_CODE                 Chsz
     FORMATS                     VST3 AU
-    IS_SYNTH                    FALSE
+    IS_SYNTH                    TRUE
     NEEDS_MIDI_INPUT            TRUE
     NEEDS_MIDI_OUTPUT           FALSE
     IS_MIDI_EFFECT              FALSE
     EDITOR_WANTS_KEYBOARD_FOCUS FALSE
     COPY_PLUGIN_AFTER_BUILD     FALSE
-    VST3_CATEGORIES             "Fx|Analyzer"
-    AU_MAIN_TYPE                "kAudioUnitType_Effect"
+    VST3_CATEGORIES             "Instrument|Synth"
+    AU_MAIN_TYPE                "kAudioUnitType_MusicDevice"
 )
 
 juce_generate_juce_header(Chromesthesia)

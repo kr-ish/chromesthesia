@@ -3,7 +3,6 @@
 
 ChromesthesiaProcessor::ChromesthesiaProcessor()
     : AudioProcessor (BusesProperties()
-          .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
           .withOutput ("Output", juce::AudioChannelSet::stereo(), true))
 {
 }
@@ -14,7 +13,7 @@ void ChromesthesiaProcessor::releaseResources() {}
 void ChromesthesiaProcessor::processBlock (juce::AudioBuffer<float>& buffer,
                                            juce::MidiBuffer& midiMessages)
 {
-    juce::ignoreUnused (buffer); // audio passes through unchanged
+    buffer.clear(); // instrument outputs silence
 
     // Inspect MIDI for color updates — do NOT clear the buffer so all
     // messages pass through unchanged to the instrument downstream.
