@@ -21,7 +21,7 @@ Key established properties of chromesthesia include:
 - **Automaticity**: Color experiences are involuntary, not deliberate visualizations (Cytowic, 1989).
 - **Consistency**: Individual mappings are highly stable over time, with test-retest reliability >90% over intervals of up to one year (Simner et al., 2006).
 - **Idiosyncrasy**: No universal pitch-to-color mapping exists across individuals. Notably, composers Scriabin and Rimsky-Korsakov — both reportedly synesthetic — agreed on almost no color assignments, despite working in the same musical tradition (Day, 2019).
-- **Pitch-height–brightness covariance**: The single most consistent cross-individual pattern is that higher pitches are associated with lighter/brighter colors and lower pitches with darker colors. This holds among both synesthetes and non-synesthetes (Marks, 1974; Ward et al., 2006).
+- **Pitch-height–brightness covariance**: The single most consistent cross-individual pattern is that higher pitches are associated with lighter/brighter colors and lower pitches with darker colors. This holds among both synesthetes and non-synesthetes (Marks, 1974; Ward et al., 2008).
 - **Structural brain differences**: Synesthetes show altered myelin content across the cortex (32 regions increased, 38 decreased) and enhanced functional connectivity between auditory and visual networks, particularly from the superior parietal lobe to visual area V4 (Ward et al., 2024; Hupé et al., 2012).
 
 ### 1.1 Neurological Models
@@ -32,7 +32,7 @@ Two principal mechanistic accounts of synesthesia are debated:
 
 **Disinhibited feedback model** (Grossenbacher & Lovelace, 2001): Synesthetic percepts arise not from structural hyperconnectivity, but from disinhibited feedback from higher-order multimodal regions to primary sensory areas. Under this model, the connections exist in all brains but are normally suppressed.
 
-Critically, a 2019 study found that approximately 5 minutes of visual deprivation facilitated auditory-evoked visual percepts (synesthesia-like experiences) in ~79% of non-synesthetes (Shankar et al., 2019). This rapid timescale is incompatible with structural change but consistent with altered inhibitory tone, providing strong support for the disinhibited feedback model. It also suggests that synesthetic cross-modal coupling may be a latent capacity present in most human brains.
+Critically, a 2019 study found that approximately 5 minutes of visual deprivation facilitated auditory-evoked visual percepts (synesthesia-like experiences) in ~50% of non-synesthetes (Nair & Brang, 2019). This rapid timescale is incompatible with structural change but consistent with altered inhibitory tone, providing strong support for the disinhibited feedback model. It also suggests that synesthetic cross-modal coupling may be a latent capacity present in most human brains.
 
 ---
 
@@ -51,8 +51,8 @@ This landmark study ran a nine-week adaptive training protocol in which particip
 **Terhune, Tai, Cowey, Popescu, & Kadosh (2011)** — *Neuropsychologia*  
 Demonstrated coordinated neural, behavioral, and phenomenological changes following overtraining of synesthetic associations, including EEG and TMS evidence. Grapheme-color synesthetes showed significantly lower phosphene thresholds in visual cortex than non-synesthetes — an index of enhanced visual cortex excitability that emerged with training.
 
-**Inducing Synesthesia in Non-Synesthetes: Short-Term Visual Deprivation Facilitates Auditory-Evoked Visual Percepts** — *Cognition* (Shankar et al., 2019)  
-After just 5 minutes of dark adaptation, ~79% of non-synesthetes reported synesthesia-like visual percepts in response to sounds. This suggests synesthetic coupling is latent in most individuals and implicates sensory gating rather than purely structural factors.
+**Inducing Synesthesia in Non-Synesthetes: Short-Term Visual Deprivation Facilitates Auditory-Evoked Visual Percepts** — *Consciousness and Cognition* (Nair & Brang, 2019)
+After just 5 minutes of dark adaptation, ~50% of non-synesthetes reported synesthesia-like visual percepts in response to sounds. This suggests synesthetic coupling is latent in most individuals and implicates sensory gating rather than purely structural factors.
 
 ### 2.2 Training Characteristics That Matter
 
@@ -212,7 +212,7 @@ Day, S. A. (2019). *Synesthetes: A handbook*. CreateSpace.
 
 Grossenbacher, P. G., & Lovelace, C. T. (2001). Mechanisms of synesthesia: Cognitive and physiological constraints. *Trends in Cognitive Sciences*, 5(1), 36–41. https://doi.org/10.1016/S1364-6613(00)01571-0
 
-Hupé, J. M., Bordier, C., & Dojat, M. (2012). A BOLD signature of eyeblinks in the visual cortex. *NeuroImage*, 61(1), 149–161. https://doi.org/10.1016/j.neuroimage.2012.02.075
+Hupé, J. M., Bordier, C., & Dojat, M. (2012). The neural bases of grapheme-color synesthesia are not localized in real color-sensitive areas. *Cerebral Cortex*, 22(7), 1619–1629. https://doi.org/10.1093/cercor/bhr236
 
 Itoh, K., Takimoto, Y., & Akatsuka, T. (2017). Musical pitch classes have rainbow hues in pitch class-color synesthesia. *Scientific Reports*, 7, 17781. https://doi.org/10.1038/s41598-017-18150-y
 
@@ -226,9 +226,7 @@ Ramachandran, V. S., & Hubbard, E. M. (2001). Synaesthesia: A window into percep
 
 Saitis, C., & Wallmark, Z. (2024). Color and tone color: Audiovisual crossmodal correspondences and timbre. *Frontiers in Psychology*, 15. https://doi.org/10.3389/fpsyg.2024.1520131
 
-Shankar, M. U., Levitan, C. A., & Spence, C. (2010). Grape expectations: The role of cognitive influences in color-flavor interactions. *Consciousness and Cognition*, 19(1), 380–390.
-
-Shankar, M. et al. (2019). Inducing synesthesia in non-synesthetes: Short-term visual deprivation facilitates auditory-evoked visual percepts. *Cognition*, 183, 67–75. https://doi.org/10.1016/j.cognition.2018.10.024
+Nair, A., & Brang, D. (2019). Inducing synesthesia in non-synesthetes: Short-term visual deprivation facilitates auditory-evoked visual percepts. *Consciousness and Cognition*, 70, 70–79. https://doi.org/10.1016/j.concog.2019.02.006
 
 Simner, J., Mulvenna, C., Sagiv, N., Tsakanikos, E., Witherby, S. A., Fraser, C., Scott, K., & Ward, J. (2006). Synaesthesia: The prevalence of atypical cross-modal experiences. *Perception*, 35(8), 1024–1033. https://doi.org/10.1068/p5469
 
@@ -236,7 +234,7 @@ Spence, C., & Di Stefano, N. (2022). Coloured hearing, colour music, colour orga
 
 Terhune, D. B., Tai, S., Cowey, A., Popescu, T., & Kadosh, R. C. (2011). Enhanced cortical excitability in grapheme-color synesthesia and its modulation. *Current Biology*, 21(23), 2006–2009. https://doi.org/10.1016/j.cub.2011.10.032
 
-Ward, J., Thompson-Lake, D., Ely, R., & Kaminski, F. (2006). Synaesthesia, creativity and art: What is the link? *British Journal of Psychology*, 99(1), 127–141. https://doi.org/10.1348/000712607X204164
+Ward, J., Thompson-Lake, D., Ely, R., & Kaminski, F. (2008). Synaesthesia, creativity and art: What is the link? *British Journal of Psychology*, 99(1), 127–141. https://doi.org/10.1348/000712607X204164
 
 Ward, J., et al. (2024). Structural brain differences in synesthetes: Altered myelin content across cortical and subcortical regions. *Cerebral Cortex*, 34(11). https://doi.org/10.1093/cercor/bhae446
 

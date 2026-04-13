@@ -107,6 +107,6 @@ Free to use, modify, and distribute for non-commercial purposes with attribution
 - Colizoli et al. (2012). Pseudo-synesthesia through reading books with colored letters. *PLOS ONE*.
 - Itoh et al. (2017). Musical pitch classes have rainbow hues. *Scientific Reports*.
 - Ottosson (2020). A perceptual color space for image processing. https://bottosson.github.io/posts/oklab/
-- Shankar et al. (2019). Inducing synesthesia in non-synesthetes. *Cognition*.
+- Nair & Brang (2019). Inducing synesthesia in non-synesthetes. *Consciousness and Cognition*.
 
 Full citations: [`docs/science.md`](docs/science.md)
