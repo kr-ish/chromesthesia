@@ -104,17 +104,17 @@ The design uses a spectral hue progression from red (C) to violet (B), implement
 
 **Continuous and microtonal:** The mapping `phase = log₂(f / f_ref) mod 1.0` is a continuous function of frequency. Any pitch — including microtonal pitches, quarter tones, or just-intonation ratios — receives a unique, interpolated color. No discrete bucketing occurs.
 
-**Octave equivalence for hue, monotone brightness:** Notes an octave apart share the same hue but differ in brightness (higher octave = brighter). This implements octave equivalence perceptually while encoding pitch register via the brightness channel — consistent with the cross-modal pitch-height/brightness finding (Marks, 1974).
+**Continuous brightness:** Lightness maps to the raw (non-floored) log-frequency value, making brightness fully continuous across the entire pitch range. Every semitone — and every microtonal interval — produces a distinct lightness level. Whether the brain infers octave equivalence from the repeating hue cycle, or treats each octave as genuinely different, is left as an open empirical question for the practitioner.
 
 **The three mapping dimensions (OKLCH):**
 
 ```
-H (hue)        = 29° + phase × 271°       C=red(29°), B=violet(300°)
-L (lightness)  = 0.10 + (octave/8) × 0.80  C0=dim, C8=bright
-C (chroma)     = 0.12 + (velocity/127) × 0.15  soft=muted, loud=vivid
+H (hue)        = 29° + phase × 271°                          C=red(29°), B=violet(300°)
+L (lightness)  = 0.10 + (clamp(octave_float, 0, 8) / 8) × 0.80   C0=dim, C8=bright (continuous)
+C (chroma)     = 0.12 + (velocity/127) × 0.15                soft=muted, loud=vivid
 ```
 
-where `phase = log₂(f / 16.3516 Hz) mod 1.0` and octave = `floor(log₂(f / 16.3516 Hz))`.
+where `phase = log₂(f / 16.3516 Hz) mod 1.0` and `octave_float = log₂(f / 16.3516 Hz)` (no floor).
 
 ### 3.4 The Circle-of-Fifths Alternative (Not Adopted)
 
@@ -248,13 +248,12 @@ Given audio frequency `f` in Hz:
 
 ```
 f_ref        = 16.3516 Hz   (C0)
-octave_float = log₂(f / f_ref)
+octave_float = log₂(f / f_ref)          (continuous; no floor)
 phase        = octave_float mod 1.0      ∈ [0.0, 1.0)
-octave       = floor(octave_float)       ∈ {0, 1, ..., 8}
 
 OKLCH:
-  H = 29.0 + phase × 271.0    (degrees; 29°=red, 300°=violet)
-  L = 0.10 + (octave / 8) × 0.80
+  H = 29.0 + phase × 271.0                              (degrees; 29°=red, 300°=violet)
+  L = 0.10 + (clamp(octave_float, 0, 8) / 8) × 0.80   (fully continuous brightness)
   C = 0.12 + (velocity / 127) × 0.15
 ```
 

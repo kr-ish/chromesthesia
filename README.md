@@ -8,7 +8,7 @@ A VST3/AU plugin for inducing chromesthesia (sound-to-color synesthesia) through
 
 ## What It Does
 
-Chromesthesia maps musical pitch to a perceptually calibrated, fullscreen color display. You play notes on a MIDI keyboard in your DAW while a second screen fills with the associated color — providing the consistent audio-visual pairing that the synesthesia induction literature indicates is necessary for cross-modal association learning.
+Chromesthesia maps musical pitch to a perceptually calibrated, fullscreen color display. You play notes on a MIDI keyboard in your DAW while a screen fills with the associated color — providing the consistent audio-visual pairing that the synesthesia induction literature indicates is necessary for cross-modal association learning.
 
 The goal is to test whether a non-synesthetic individual can develop automatic color percepts in response to musical pitch through six-to-nine weeks of daily, high-immersion associative practice.
 
@@ -23,10 +23,10 @@ Colors are grounded in actual audio frequency (Hz), not MIDI note number — so 
 | OKLCH dimension | Maps to | Formula |
 |---|---|---|
 | Hue (H) | Pitch class (position within octave) | `29° + phase × 271°` — red (C) → violet (B) |
-| Lightness (L) | Octave / pitch height | `0.10 + (octave/8) × 0.80` — low=dark, high=bright |
+| Lightness (L) | Pitch height (continuous) | `0.10 + (octave_float/8) × 0.80` — fully continuous; every semitone is a distinct brightness |
 | Chroma (C) | MIDI velocity | `0.12 + (velocity/127) × 0.15` — soft=muted, loud=vivid |
 
-Where `phase = log₂(f / 16.3516 Hz) mod 1.0`.
+Where `phase = log₂(f / 16.3516 Hz) mod 1.0` and `octave_float = log₂(f / 16.3516 Hz)` (no flooring — brightness is fully continuous across the pitch range).
 
 Colors are computed in [OKLCH](https://bottosson.github.io/posts/oklab/) (Ottosson, 2020), a perceptually uniform color space, rather than HSL — ensuring that equal musical intervals produce equal perceived color changes.
 

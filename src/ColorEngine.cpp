@@ -6,12 +6,11 @@ OKLCH ColorEngine::frequencyToOKLCH(float freq_hz, int velocity) noexcept {
         return { 0.0f, 0.0f, HUE_MIN };
 
     const float octave_float = std::log2(freq_hz / F_REF);
-    const float phase  = octave_float - std::floor(octave_float); // 0.0–1.0
-    const float octave = std::clamp(std::floor(octave_float), 0.0f, 8.0f);
-    const float vel    = std::clamp(velocity / 127.0f, 0.0f, 1.0f);
+    const float phase        = octave_float - std::floor(octave_float); // 0.0–1.0
+    const float vel          = std::clamp(velocity / 127.0f, 0.0f, 1.0f);
 
     return {
-        0.10f + (octave / 8.0f) * 0.80f,           // L: dim=dark, high=bright
+        0.10f + (std::clamp(octave_float, 0.0f, 8.0f) / 8.0f) * 0.80f, // L: continuous pitch height → brightness
         CHROMA_MIN + vel * (CHROMA_MAX - CHROMA_MIN), // C: soft=muted, loud=vivid
         HUE_MIN + phase * HUE_RANGE                  // H: C=red(29°)…B=violet(300°)
     };
