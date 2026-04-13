@@ -19,12 +19,12 @@ juce_add_plugin(Chromesthesia
     FORMATS                     VST3 AU
     IS_SYNTH                    FALSE
     NEEDS_MIDI_INPUT            TRUE
-    NEEDS_MIDI_OUTPUT           TRUE
-    IS_MIDI_EFFECT              TRUE
+    NEEDS_MIDI_OUTPUT           FALSE
+    IS_MIDI_EFFECT              FALSE
     EDITOR_WANTS_KEYBOARD_FOCUS FALSE
     COPY_PLUGIN_AFTER_BUILD     FALSE
-    VST3_CATEGORIES             "Fx|MIDI"
-    AU_MAIN_TYPE                "kAudioUnitType_MIDIProcessor"
+    VST3_CATEGORIES             "Fx|Analyzer"
+    AU_MAIN_TYPE                "kAudioUnitType_Effect"
 )
 
 juce_generate_juce_header(Chromesthesia)
