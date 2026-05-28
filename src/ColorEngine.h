@@ -19,29 +19,38 @@ struct sRGB {
 //==============================================================================
 // ColorEngine: pure math, no JUCE dependency.
 //
-// Mapping design:
-//   H = 29 + phase × 271          spectral red (C) → violet (B)
-//   L = 0.10 + (octave/8) × 0.80  low=dark, high=bright
-//   C = 0.12 + (velocity/127)×0.15 soft=muted, loud=vivid
+// Mapping design (Sa-anchored at C#0 for Hindustani vocal practice):
+//   H = 29 + phase × 271          spectral red (Sa = C#) → violet (Ni = C)
+//   L = 0.25 + (clamp(octave_float, 1, 7) − 1) / 6 × 0.65
+//                                 monotonic pitch-height → brightness across
+//                                 C1–C7 (covers all musical instruments;
+//                                 vocal range C3–C5 lands at L=0.47–0.69).
+//   C = 0.12 + (velocity/127) × 0.06   soft = muted, loud = vivid; ceiling
+//                                       chosen to stay in sRGB gamut for most
+//                                       hue/L combos. Out-of-gamut requests are
+//                                       handled by chroma-reduction gamut
+//                                       mapping in oklchToSRGB().
 //
-// where phase = log2(f / F_REF) mod 1.0  (tuning-agnostic, continuous)
-//       octave = floor(log2(f / F_REF))
-//       F_REF  = C0 = 16.3516 Hz
+// where phase  = log2(f / F_REF) mod 1.0   (tuning-agnostic, continuous)
+//       F_REF  = C#0 = 17.3239 Hz          (so Sa = C# → hue 29° = red)
 //==============================================================================
 class ColorEngine {
 public:
-    static constexpr float F_REF      = 16.3516f;  // C0
-    static constexpr float HUE_MIN    = 29.0f;     // OKLCH hue for red (C)
+    static constexpr float F_REF      = 17.3239f;  // C#0 (Sa, Hindustani scale C#)
+    static constexpr float HUE_MIN    = 29.0f;     // OKLCH hue for red (Sa)
     static constexpr float HUE_RANGE  = 271.0f;    // red → violet span
     static constexpr float CHROMA_MIN = 0.12f;
-    static constexpr float CHROMA_MAX = 0.27f;
+    static constexpr float CHROMA_MAX = 0.18f;     // safely in sRGB gamut for
+                                                    // most hue/L combinations
 
     // Compute display color from audio frequency and MIDI velocity (0–127).
     // Returns black (L=0, C=0) if freq <= 0.
     static OKLCH frequencyToOKLCH(float freq_hz, int velocity_0_127) noexcept;
 
-    // Convert OKLCH to sRGB using Ottosson's exact matrices.
-    // Simple gamut clamp (per-channel) — safe for our controlled palette.
+    // Convert OKLCH to sRGB using Ottosson's exact matrices, with CSS Color 4
+    // gamut mapping (chroma reduction at constant L and H) for out-of-gamut
+    // requests. Hue is preserved exactly; per-channel clipping after gamut
+    // mapping is below JND.
     static sRGB oklchToSRGB(OKLCH c) noexcept;
 
     // Interpolate L and C linearly, hold H constant.

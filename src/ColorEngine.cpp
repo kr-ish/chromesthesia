@@ -1,29 +1,16 @@
 #include "ColorEngine.h"
 #include <algorithm>
 
-OKLCH ColorEngine::frequencyToOKLCH(float freq_hz, int velocity) noexcept {
-    if (freq_hz <= 0.0f)
-        return { 0.0f, 0.0f, HUE_MIN };
+namespace {
 
-    const float octave_float = std::log2(freq_hz / F_REF);
-    const float phase        = octave_float - std::floor(octave_float); // 0.0–1.0
-    const float vel          = std::clamp(velocity / 127.0f, 0.0f, 1.0f);
+struct LinearRGB { float r, g, b; };
 
-    return {
-        0.10f + (std::clamp(octave_float, 0.0f, 8.0f) / 8.0f) * 0.80f, // L: continuous pitch height → brightness
-        CHROMA_MIN + vel * (CHROMA_MAX - CHROMA_MIN), // C: soft=muted, loud=vivid
-        HUE_MIN + phase * HUE_RANGE                  // H: C=red(29°)…B=violet(300°)
-    };
-}
-
-sRGB ColorEngine::oklchToSRGB(OKLCH lch) noexcept {
-    // OKLCH → OKLAB
+LinearRGB oklchToLinearRGB(OKLCH lch) noexcept {
     const float h = lch.H * (3.14159265358979323846f / 180.0f);
     const float a = lch.C * std::cos(h);
     const float b = lch.C * std::sin(h);
     const float L = lch.L;
 
-    // OKLAB → LMS (via cube-root intermediate)
     const float l_ = L + 0.3963377774f * a + 0.2158037573f * b;
     const float m_ = L - 0.1055613458f * a - 0.0638541728f * b;
     const float s_ = L - 0.0894841775f * a - 1.2914855480f * b;
@@ -32,16 +19,68 @@ sRGB ColorEngine::oklchToSRGB(OKLCH lch) noexcept {
     const float m = m_ * m_ * m_;
     const float s = s_ * s_ * s_;
 
-    // LMS → linear RGB (Ottosson)
-    const float r  =  4.0767416621f * l - 3.3077115913f * m + 0.2309699292f * s;
-    const float g  = -1.2684380046f * l + 2.6097574011f * m - 0.3413193965f * s;
-    const float bv = -0.0041960863f * l - 0.7034186147f * m + 1.7076147010f * s;
-
-    // Gamut clamp then sRGB gamma
     return {
-        linearToSRGB(std::clamp(r,  0.0f, 1.0f)),
-        linearToSRGB(std::clamp(g,  0.0f, 1.0f)),
-        linearToSRGB(std::clamp(bv, 0.0f, 1.0f))
+         4.0767416621f * l - 3.3077115913f * m + 0.2309699292f * s,
+        -1.2684380046f * l + 2.6097574011f * m - 0.3413193965f * s,
+        -0.0041960863f * l - 0.7034186147f * m + 1.7076147010f * s
+    };
+}
+
+bool inSRGBGamut(LinearRGB rgb) noexcept {
+    constexpr float eps = 1.0e-4f;
+    return rgb.r >= -eps && rgb.r <= 1.0f + eps &&
+           rgb.g >= -eps && rgb.g <= 1.0f + eps &&
+           rgb.b >= -eps && rgb.b <= 1.0f + eps;
+}
+
+} // namespace
+
+OKLCH ColorEngine::frequencyToOKLCH(float freq_hz, int velocity) noexcept {
+    if (freq_hz <= 0.0f)
+        return { 0.0f, 0.0f, HUE_MIN };
+
+    const float octave_float = std::log2(freq_hz / F_REF);
+    const float phase        = octave_float - std::floor(octave_float); // 0.0–1.0
+    const float vel          = std::clamp(velocity / 127.0f, 0.0f, 1.0f);
+
+    // Lightness: monotonic across C1–C7 (covers virtually all musical
+    // instruments). Vocal range C3–C5 lands at L≈0.47–0.69, centered on the
+    // visible dynamic range for maximum perceptual contrast where most
+    // training occurs while preserving extrapolation outside vocal range.
+    const float L = 0.25f + (std::clamp(octave_float, 1.0f, 7.0f) - 1.0f) / 6.0f * 0.65f;
+
+    return {
+        L,
+        CHROMA_MIN + vel * (CHROMA_MAX - CHROMA_MIN),
+        HUE_MIN + phase * HUE_RANGE
+    };
+}
+
+sRGB ColorEngine::oklchToSRGB(OKLCH lch) noexcept {
+    // CSS Color 4 gamut mapping: hold L and H, binary-search C downward until
+    // the color enters sRGB. Without this, per-channel clamping after the
+    // matrix transform shifts hue away from the OKLCH H we specified —
+    // breaking the pitch-color consistency the conditioning protocol depends
+    // on across velocity and lightness.
+    LinearRGB linear = oklchToLinearRGB(lch);
+
+    if (!inSRGBGamut(linear)) {
+        OKLCH probe = lch;
+        float lo = 0.0f, hi = lch.C;
+        for (int i = 0; i < 16; ++i) {           // ~1e-5 chroma precision
+            const float mid = 0.5f * (lo + hi);
+            probe.C = mid;
+            if (inSRGBGamut(oklchToLinearRGB(probe))) lo = mid;
+            else                                      hi = mid;
+        }
+        probe.C = lo;
+        linear  = oklchToLinearRGB(probe);
+    }
+
+    return {
+        linearToSRGB(std::clamp(linear.r, 0.0f, 1.0f)),
+        linearToSRGB(std::clamp(linear.g, 0.0f, 1.0f)),
+        linearToSRGB(std::clamp(linear.b, 0.0f, 1.0f))
     };
 }
 

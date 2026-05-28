@@ -138,8 +138,19 @@ juce::String ChromesthesiaEditor::noteLabel() const
         "C", "C#", "D", "D#", "E", "F",
         "F#", "G", "G#", "A", "A#", "B"
     };
+    // Hindustani swara names (Sa-anchored at C#, Bhatkhande shorthand:
+    // lowercase = komal, uppercase = shuddha, MA = teevra Ma).
+    // Indexed by chromatic offset from Sa: (midi_note - 1) mod 12.
+    static const char* swaras[] = {
+        "Sa", "re", "Re", "ga", "Ga", "Ma",
+        "MA", "Pa", "dha", "Dha", "ni", "Ni"
+    };
+
     const int octave = (note / 12) - 1;
+    const int swaraIdx = ((note - 1) % 12 + 12) % 12; // safe mod for negatives
+
     String label = String (names[note % 12]) + String (octave);
+    label += " (" + String (swaras[swaraIdx]) + ")";
     label += "   " + String (freq, 1) + " Hz";
 
     const OKLCH c = proc.getCurrentOKLCH();
