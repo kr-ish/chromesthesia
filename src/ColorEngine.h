@@ -5,7 +5,7 @@
 struct OKLCH {
     float L = 0.0f;  // lightness: 0.0–1.0
     float C = 0.0f;  // chroma:    0.0–~0.37
-    float H = 29.0f; // hue:       degrees (29°=red, 300°=violet)
+    float H = 29.0f; // hue:       degrees (Sa=29° red → Ni=277° violet; wraps at 300°)
 };
 
 struct sRGB {

@@ -35,6 +35,7 @@ ChromesthesiaEditor::ChromesthesiaEditor (ChromesthesiaProcessor& p)
 
     // Create window now (hidden); it will be shown on demand.
     colorWindow = std::make_unique<FullscreenColorWindow> (proc);
+    colorWindow->onEscapeRequested = [this] { exitFullscreen(); };
 
     startTimerHz (30);
 }
@@ -70,21 +71,30 @@ void ChromesthesiaEditor::resized()
     titleLabel.setBounds (area.removeFromTop (28));
     area.removeFromTop (6);
 
-    // Display row
-    auto displayRow = area.removeFromTop (26);
-    displayLabel  .setBounds (displayRow.removeFromLeft (60));
-    displayRow.removeFromLeft (6);
-    displayCombo  .setBounds (displayRow.removeFromLeft (180));
-    displayRow.removeFromLeft (8);
-    fullscreenButton.setBounds (displayRow.removeFromLeft (120));
+    // Control row
+    auto controlRow = area.removeFromTop (26);
 
-    area.removeFromTop (10);
+    if (! isFullscreen)
+    {
+        displayLabel  .setBounds (controlRow.removeFromLeft (60));
+        controlRow.removeFromLeft (6);
+        displayCombo  .setBounds (controlRow.removeFromLeft (180));
+        controlRow.removeFromLeft (8);
+    }
+    fullscreenButton.setBounds (controlRow.removeFromLeft (140));
 
-    // Swatch + note label
-    auto bottomRow = area.removeFromTop (70);
-    swatchBounds = bottomRow.removeFromLeft (70);
-    bottomRow.removeFromLeft (12);
-    noteInfoLabel.setBounds (bottomRow);
+    if (! isFullscreen)
+    {
+        area.removeFromTop (10);
+        auto bottomRow = area.removeFromTop (70);
+        swatchBounds = bottomRow.removeFromLeft (70);
+        bottomRow.removeFromLeft (12);
+        noteInfoLabel.setBounds (bottomRow);
+    }
+    else
+    {
+        swatchBounds = {};
+    }
 }
 
 //==============================================================================
@@ -111,19 +121,47 @@ void ChromesthesiaEditor::populateDisplayList()
 
 void ChromesthesiaEditor::toggleFullscreen()
 {
-    if (!isFullscreen)
-    {
-        const int selectedIndex = displayCombo.getSelectedId() - 1; // ID is index+1
-        colorWindow->showOnDisplay (selectedIndex);
-        fullscreenButton.setButtonText ("Exit Fullscreen");
-        isFullscreen = true;
-    }
+    if (! isFullscreen)
+        enterFullscreen();
     else
-    {
-        colorWindow->hide();
-        fullscreenButton.setButtonText ("Go Fullscreen");
-        isFullscreen = false;
-    }
+        exitFullscreen();
+}
+
+void ChromesthesiaEditor::enterFullscreen()
+{
+    if (isFullscreen) return;
+
+    const int selectedIndex = displayCombo.getSelectedId() - 1; // ID is index+1
+    colorWindow->showOnDisplay (selectedIndex);
+
+    fullscreenButton.setButtonText ("Exit Fullscreen");
+    titleLabel.setText ("Chromesthesia  —  fullscreen active (Esc to exit, C for palette)",
+                        juce::dontSendNotification);
+
+    // Hide the bits that are irrelevant while fullscreen is up.
+    displayLabel  .setVisible (false);
+    displayCombo  .setVisible (false);
+    noteInfoLabel .setVisible (false);
+
+    isFullscreen = true;
+    setSize (W, H_MINIMIZED);  // triggers resized()
+}
+
+void ChromesthesiaEditor::exitFullscreen()
+{
+    if (! isFullscreen) return;
+
+    colorWindow->hide();
+
+    fullscreenButton.setButtonText ("Go Fullscreen");
+    titleLabel.setText ("Chromesthesia", juce::dontSendNotification);
+
+    displayLabel  .setVisible (true);
+    displayCombo  .setVisible (true);
+    noteInfoLabel .setVisible (true);
+
+    isFullscreen = false;
+    setSize (W, H);  // triggers resized()
 }
 
 juce::String ChromesthesiaEditor::noteLabel() const

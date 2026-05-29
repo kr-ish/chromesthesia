@@ -29,6 +29,8 @@ private:
     void timerCallback() override;
     void populateDisplayList();
     void toggleFullscreen();
+    void enterFullscreen();
+    void exitFullscreen();
     juce::String noteLabel() const;
 
     ChromesthesiaProcessor& proc;
@@ -45,8 +47,9 @@ private:
     std::unique_ptr<FullscreenColorWindow> colorWindow;
     bool isFullscreen { false };
 
-    static constexpr int W = 380;
-    static constexpr int H = 180;
+    static constexpr int W           = 380;
+    static constexpr int H           = 180;
+    static constexpr int H_MINIMIZED = 80;  // height when fullscreen is active
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChromesthesiaEditor)
 };
