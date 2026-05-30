@@ -35,7 +35,7 @@ bool inSRGBGamut(LinearRGB rgb) noexcept {
 
 } // namespace
 
-OKLCH ColorEngine::frequencyToOKLCH(float freq_hz, int velocity) noexcept {
+OKLCH ColorEngine::frequencyToOKLCH(float freq_hz, int velocity, float hue_range) noexcept {
     if (freq_hz <= 0.0f)
         return { 0.0f, 0.0f, HUE_MIN };
 
@@ -49,10 +49,14 @@ OKLCH ColorEngine::frequencyToOKLCH(float freq_hz, int velocity) noexcept {
     // training occurs while preserving extrapolation outside vocal range.
     const float L = 0.25f + (std::clamp(octave_float, 1.0f, 7.0f) - 1.0f) / 6.0f * 0.65f;
 
+    // Hue wrapped into [0,360): a no-op for the 271° arc (max 300°), required
+    // for the 360° wrap test mode where HUE_MIN + phase*360 can reach 389°.
+    const float H = std::fmod(HUE_MIN + phase * hue_range, 360.0f);
+
     return {
         L,
         CHROMA_MIN + vel * (CHROMA_MAX - CHROMA_MIN),
-        HUE_MIN + phase * HUE_RANGE
+        H
     };
 }
 

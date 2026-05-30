@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chromesthesia — Chord &amp; Interval Color Explorer</title>
+<style>
+  :root { --bg:#0a0a0c; --panel:#141418; --line:#2a2a32; --txt:#e6e6ea; --dim:#9a9aa6; }
+  * { box-sizing: border-box; }
+  body {
+    margin:0; background:var(--bg); color:var(--txt);
+    font:15px/1.5 -apple-system, "SF Pro Text", Helvetica, Arial, sans-serif;
+    padding:28px 22px 80px;
+  }
+  h1 { font-size:22px; margin:0 0 4px; font-weight:600; }
+  h2 { font-size:16px; margin:34px 0 14px; font-weight:600; letter-spacing:.02em;
+       border-bottom:1px solid var(--line); padding-bottom:8px; color:#fff; }
+  .sub { color:var(--dim); margin:0 0 18px; max-width:780px; }
+  .modebar {
+    position:sticky; top:0; z-index:10; background:rgba(10,10,12,.92);
+    backdrop-filter:blur(6px); padding:12px 0 12px; margin:8px 0 6px;
+    border-bottom:1px solid var(--line); display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  }
+  button#toggle {
+    font:600 15px/1 inherit; color:#fff; background:#26304a;
+    border:1px solid #3a4a6e; border-radius:8px; padding:11px 18px; cursor:pointer;
+  }
+  button#toggle:hover { background:#2f3c5e; }
+  .modelabel { font-weight:600; }
+  .modelabel b { color:#7fb4ff; }
+  details { max-width:820px; margin:10px 0 6px; color:var(--dim); }
+  details summary { cursor:pointer; color:#9fb6e0; }
+  details p { margin:10px 0; }
+  code { background:#1c1c22; padding:1px 5px; border-radius:4px; font-size:13px; }
+
+  .chromstrip { display:flex; gap:3px; margin:6px 0 4px; max-width:760px; }
+  .chromstrip .swatch { flex:1; }
+
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(232px,1fr)); gap:16px; }
+  .card {
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:14px 14px 16px; display:flex; flex-direction:column; align-items:center;
+  }
+  .card-title { font-weight:600; font-size:15px; align-self:flex-start; }
+  .card-sub { color:var(--dim); font-size:13px; align-self:flex-start; margin-bottom:11px; }
+  .swatches { display:flex; gap:6px; width:100%; margin-bottom:12px; }
+  .swatch {
+    flex:1; min-height:62px; border-radius:7px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:1px; padding:4px 2px;
+    box-shadow:0 0 0 1px rgba(255,255,255,.06) inset;
+  }
+  .sw-swara { font-weight:700; font-size:15px; }
+  .sw-west  { font-size:11px; opacity:.8; }
+  .sw-h     { font-size:10px; opacity:.7; font-variant-numeric:tabular-nums; }
+  .angles { color:var(--dim); font-size:12px; margin-top:8px; font-variant-numeric:tabular-nums; }
+  svg { display:block; }
+  footer { color:var(--dim); font-size:13px; margin-top:40px; max-width:820px;
+           border-top:1px solid var(--line); padding-top:14px; }
+</style>
+</head>
+<body>
+
+<h1>Chord &amp; Interval Color Explorer</h1>
+<p class="sub">
+  How the two candidate hue mappings (271° spectral arc vs. 360° octave wrap) color common chords and
+  intervals, rooted at <b>C# = Sa</b>. Colors are computed with the exact plugin math (OKLCH + CSS&nbsp;Color&nbsp;4
+  gamut mapping) and shown on black, matching the fullscreen training display.
+</p>
+
+<div class="modebar">
+  <button id="toggle">Switch mapping</button>
+  <span class="modelabel">Current: <b id="modename"></b></span>
+  <span class="modelabel" style="color:var(--dim);font-weight:400" id="modedesc"></span>
+</div>
+
+<details>
+  <summary>How to read this — and what "color consonance" means here</summary>
+  <p>
+    Each note is a square swatch (its actual plugin color) and a dot on the hue wheel. The wheel's dashed
+    radial marks sit at <b>29°</b> and <b>300°</b> — the bounds of the spectral arc. In <b>271° arc</b> mode,
+    dots never fall in the ~89° gap between them (the non-spectral purples); in <b>360° wrap</b> mode they do.
+  </p>
+  <p>
+    "Color consonance" isn't a defined quantity, but you can read the geometry: notes <b>close in hue</b>
+    (small angle) are analogous — low contrast, can look muddy; notes <b>~180° apart</b> are complementary —
+    maximum contrast; <b>~120° apart</b> is a balanced "triadic" relationship.
+  </p>
+  <p>
+    The structural difference: in <b>360° wrap</b> a semitone is exactly <code>30°</code> of hue, so each
+    interval maps to a <b>fixed</b> hue angle no matter the root, and the tritone (6 semitones) is an exact
+    <code>180°</code> complementary pair. In <b>271° arc</b> a semitone is <code>22.6°</code>, so intervals are
+    compressed and none land on exact complementary — the tritone is only 136°. Watch the wheel "shapes"
+    change as you toggle.
+  </p>
+</details>
+
+<h2>Chromatic reference (Sa → Sa)</h2>
+<div class="chromstrip swatches" id="chrom"></div>
+
+<h2>Chords (rooted at C# / Sa)</h2>
+<div class="grid" id="chords"></div>
+
+<h2>Consonant intervals</h2>
+<div class="grid" id="consonant"></div>
+
+<h2>Dissonant intervals</h2>
+<div class="grid" id="dissonant"></div>
+
+<footer>
+  Assumptions: root <b>C#4 = 277.18&nbsp;Hz</b> (Sa madhya saptak), MIDI velocity 100 (chroma ≈ 0.167 before
+  gamut mapping). Lightness rises with pitch height, so higher notes are lighter — that brightness difference
+  is identical in both mappings; only hue changes between them. Octave (P8) is the same hue in both modes
+  (pitch-class constancy), differing only in lightness. See <code>docs/science.md</code> Appendix&nbsp;C.
+</footer>
+
+<script>
+//================================================================
+// Ported verbatim from src/ColorEngine.{h,cpp}
+//================================================================
+const F_REF = 17.3239, HUE_MIN = 29, CHROMA_MIN = 0.12, CHROMA_MAX = 0.18;
+const ROOT  = 277.1826;                 // C#4 = Sa madhya
+
+function oklchToLinearRGB(L, C, Hdeg) {
+  const h = Hdeg * Math.PI / 180;
+  const a = C * Math.cos(h), b = C * Math.sin(h);
+  const l_ = L + 0.3963377774*a + 0.2158037573*b;
+  const m_ = L - 0.1055613458*a - 0.0638541728*b;
+  const s_ = L - 0.0894841775*a - 1.2914855480*b;
+  const l = l_*l_*l_, m = m_*m_*m_, s = s_*s_*s_;
+  return [
+     4.0767416621*l - 3.3077115913*m + 0.2309699292*s,
+    -1.2684380046*l + 2.6097574011*m - 0.3413193965*s,
+    -0.0041960863*l - 0.7034186147*m + 1.7076147010*s
+  ];
+}
+function inGamut(rgb) {
+  const e = 1e-4;
+  return rgb.every(v => v >= -e && v <= 1 + e);
+}
+function oklchToSRGB(L, C, H) {
+  let lin = oklchToLinearRGB(L, C, H);
+  if (!inGamut(lin)) {                          // CSS Color 4: reduce C at fixed L,H
+    let lo = 0, hi = C;
+    for (let i = 0; i < 16; i++) {
+      const mid = (lo + hi) / 2;
+      if (inGamut(oklchToLinearRGB(L, mid, H))) lo = mid; else hi = mid;
+    }
+    lin = oklchToLinearRGB(L, lo, H);
+  }
+  const g = x => { x = Math.min(Math.max(x, 0), 1);
+                   return x <= 0.0031308 ? 12.92*x : 1.055*Math.pow(x, 1/2.4) - 0.055; };
+  const c8 = v => Math.round(g(v) * 255);
+  return `rgb(${c8(lin[0])},${c8(lin[1])},${c8(lin[2])})`;
+}
+function freqToOKLCH(freq, velocity, hueRange) {
+  const oct   = Math.log2(freq / F_REF);
+  const phase = oct - Math.floor(oct);
+  const vel   = Math.min(Math.max(velocity / 127, 0), 1);
+  const L = 0.25 + (Math.min(Math.max(oct, 1), 7) - 1) / 6 * 0.65;
+  const C = CHROMA_MIN + vel * (CHROMA_MAX - CHROMA_MIN);
+  const H = ((HUE_MIN + phase * hueRange) % 360 + 360) % 360;
+  return { L, C, H };
+}
+
+//================================================================
+// Musical data
+//================================================================
+const SWARA = ['Sa','re','Re','ga','Ga','Ma','MA','Pa','dha','Dha','ni','Ni','Sa'];
+const NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+function westName(off) { const m = 61 + off; return NAMES[m % 12] + (Math.floor(m/12) - 1); }
+
+const CHORDS = [
+  { name:'Major triad', offsets:[0,4,7] },
+  { name:'Major 7th',   offsets:[0,4,7,11] },
+  { name:'Minor triad', offsets:[0,3,7] },
+  { name:'Minor 7th',   offsets:[0,3,7,10] },
+];
+const CONSONANT = [
+  { name:'Octave (P8)',  offsets:[0,12] },
+  { name:'Perfect 5th',  offsets:[0,7] },
+  { name:'Perfect 4th',  offsets:[0,5] },
+  { name:'Major 3rd',    offsets:[0,4] },
+  { name:'Minor 3rd',    offsets:[0,3] },
+  { name:'Major 6th',    offsets:[0,9] },
+];
+const DISSONANT = [
+  { name:'Minor 2nd',     offsets:[0,1] },
+  { name:'Major 2nd',     offsets:[0,2] },
+  { name:'Tritone (A4)',  offsets:[0,6] },
+  { name:'Minor 7th',     offsets:[0,10] },
+  { name:'Major 7th',     offsets:[0,11] },
+];
+
+//================================================================
+// Rendering
+//================================================================
+let hueRange = 271;
+const NS = 'http://www.w3.org/2000/svg';
+
+function el(tag, cls, txt) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (txt != null) e.textContent = txt;
+  return e;
+}
+function pt(cx, cy, r, deg) {
+  const t = deg * Math.PI / 180;
+  return [cx + r*Math.cos(t), cy - r*Math.sin(t)];   // y flipped: 0°=right, 90°=up
+}
+function wedge(cx, cy, rIn, rOut, a0, a1) {
+  const p1 = pt(cx,cy,rOut,a0), p2 = pt(cx,cy,rOut,a1),
+        p3 = pt(cx,cy,rIn,a1),  p4 = pt(cx,cy,rIn,a0);
+  return `M${p1} L${p2} L${p3} L${p4} Z`;
+}
+function svgEl(tag, attrs) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+function notesFor(offsets) {
+  return offsets.map(o => {
+    const c = freqToOKLCH(ROOT * Math.pow(2, o/12), 100, hueRange);
+    return { off:o, ...c, rgb:oklchToSRGB(c.L, c.C, c.H), swara:SWARA[o], west:westName(o) };
+  });
+}
+
+function swatchEl(n, withLabels = true) {
+  const s = el('div', 'swatch');
+  s.style.background = n.rgb;
+  s.style.color = n.L > 0.62 ? '#111' : '#fff';
+  if (withLabels) {
+    s.appendChild(el('span', 'sw-swara', n.swara));
+    s.appendChild(el('span', 'sw-west', n.west));
+    s.appendChild(el('span', 'sw-h', Math.round(n.H) + '°'));
+  }
+  return s;
+}
+
+function hueWheel(notes) {
+  const size=170, cx=85, cy=85, rOut=74, rIn=54, rDot=64;
+  const svg = svgEl('svg', { width:size, height:size, viewBox:`0 0 ${size} ${size}` });
+
+  for (let a = 0; a < 360; a += 6)
+    svg.appendChild(svgEl('path', { d:wedge(cx,cy,rIn,rOut,a,a+6), fill:oklchToSRGB(0.62,0.15,a+3) }));
+
+  // spectral-arc bounds (29° and 300°): everything between, the short way, is the non-spectral purples.
+  [29, 300].forEach(a => {
+    const [xi,yi] = pt(cx,cy,rIn-3,a), [xo,yo] = pt(cx,cy,rOut+5,a);
+    svg.appendChild(svgEl('line', { x1:xi,y1:yi,x2:xo,y2:yo,
+      stroke:'rgba(255,255,255,.5)', 'stroke-width':1, 'stroke-dasharray':'2 2' }));
+  });
+
+  if (notes.length > 1) {
+    const pts = notes.map(n => pt(cx,cy,rDot,n.H).join(',')).join(' ');
+    svg.appendChild(svgEl(notes.length > 2 ? 'polygon' : 'polyline', {
+      points:pts, fill:notes.length > 2 ? 'rgba(255,255,255,.10)' : 'none',
+      stroke:'rgba(255,255,255,.8)', 'stroke-width':1.5 }));
+  }
+  notes.forEach(n => {
+    const [x,y] = pt(cx,cy,rDot,n.H);
+    svg.appendChild(svgEl('circle', { cx:x,cy:y,r:8.5, fill:'none', stroke:'rgba(255,255,255,.9)', 'stroke-width':1 }));
+    svg.appendChild(svgEl('circle', { cx:x,cy:y,r:7, fill:n.rgb, stroke:'#000', 'stroke-width':2 }));
+  });
+  return svg;
+}
+
+function cardEl(item) {
+  const notes = notesFor(item.offsets);
+  const c = el('div', 'card');
+  c.appendChild(el('div', 'card-title', item.name));
+  c.appendChild(el('div', 'card-sub', item.offsets.map(o => SWARA[o]).join('  ·  ')));
+  const sw = el('div', 'swatches');
+  notes.forEach(n => sw.appendChild(swatchEl(n)));
+  c.appendChild(sw);
+  c.appendChild(hueWheel(notes));
+  c.appendChild(el('div', 'angles', notes.map(n => Math.round(n.H) + '°').join(' · ')));
+  return c;
+}
+
+function fill(id, list) {
+  const host = document.getElementById(id);
+  host.innerHTML = '';
+  list.forEach(item => host.appendChild(cardEl(item)));
+}
+
+function render() {
+  document.getElementById('modename').textContent = hueRange === 271 ? '271° spectral arc' : '360° octave wrap';
+  document.getElementById('modedesc').textContent = hueRange === 271
+    ? '— red→violet, spectral hues only; 89° octave seam'
+    : '— full hue circle through the purples; continuous across octaves';
+
+  // chromatic reference strip
+  const chrom = document.getElementById('chrom');
+  chrom.innerHTML = '';
+  notesFor([0,1,2,3,4,5,6,7,8,9,10,11,12]).forEach(n => chrom.appendChild(swatchEl(n)));
+
+  fill('chords', CHORDS);
+  fill('consonant', CONSONANT);
+  fill('dissonant', DISSONANT);
+}
+
+document.getElementById('toggle').addEventListener('click', () => {
+  hueRange = hueRange === 271 ? 360 : 271;
+  render();
+});
+render();
+</script>
+</body>
+</html>

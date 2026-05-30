@@ -3,28 +3,15 @@
 
 namespace {
 
-// 12 swara reference colors for the calibration palette, all at madhya saptak
-// lightness (L≈0.58) and a mid-range chroma (C=0.15). If any of these look
-// off-spectrum on screen, Night Shift / True Tone / or a third-party warmth
-// app is likely active — see README "Display setup" section.
-struct SwaraRef {
-    const char* name;
-    float       hue_deg;
-};
-
-constexpr SwaraRef kCalibrationSwaras[12] = {
-    { "Sa",  29.0f  },
-    { "re",  51.6f  },
-    { "Re",  74.2f  },
-    { "ga",  96.8f  },
-    { "Ga",  119.3f },
-    { "Ma",  141.9f },
-    { "MA",  164.5f },
-    { "Pa",  187.1f },
-    { "dha", 209.7f },
-    { "Dha", 232.2f },
-    { "ni",  254.8f },
-    { "Ni",  277.4f }
+// Swara names for the calibration palette (Sa-anchored, Bhatkhande shorthand:
+// lowercase = komal, uppercase = shuddha, MA = teevra Ma). Hue is computed at
+// paint time from the processor's current hue range, so the palette tracks the
+// 271° arc vs 360° wrap TEST TOGGLE. If Sa does not read as pure red, Night
+// Shift / True Tone / a third-party warmth app is likely active — see README
+// "Display Setup".
+const char* const kSwaraNames[12] = {
+    "Sa", "re", "Re", "ga", "Ga", "Ma",
+    "MA", "Pa", "dha", "Dha", "ni", "Ni"
 };
 
 constexpr float kCalibrationL = 0.58f;  // madhya saptak
@@ -36,7 +23,10 @@ FullscreenColorWindow::FullscreenColorWindow (ChromesthesiaProcessor& p)
     : processor (p)
 {
     setOpaque (true);
-    setWantsKeyboardFocus (true);  // required for keyPressed to fire
+    // Intentionally NOT keyboard-focusable: a focus-grabbing window would
+    // intercept computer-keyboard MIDI typed into the host. Controls live in
+    // the plugin editor instead.
+    setWantsKeyboardFocus (false);
 
     // Create a native borderless window.
     addToDesktop (juce::ComponentPeer::windowAppearsOnTaskbar);
@@ -65,12 +55,11 @@ void FullscreenColorWindow::showOnDisplay (int displayIndex)
     setVisible (true);
     toFront (false);
 
-    // Ask the peer to go truly fullscreen on this display.
+    // Ask the peer to go truly fullscreen on this display. toFront(false) shows
+    // it without stealing keyboard focus from the host (so computer-keyboard
+    // MIDI keeps working).
     if (auto* peer = getPeer())
         peer->setFullScreen (true);
-
-    // Take keyboard focus so Escape and C are received.
-    grabKeyboardFocus();
 }
 
 void FullscreenColorWindow::hide()
@@ -103,24 +92,10 @@ void FullscreenColorWindow::timerCallback()
     repaint();
 }
 
-bool FullscreenColorWindow::keyPressed (const juce::KeyPress& key)
+void FullscreenColorWindow::setCalibration (bool on)
 {
-    if (key == juce::KeyPress::escapeKey)
-    {
-        calibrationMode = false;
-        if (onEscapeRequested) onEscapeRequested();
-        return true;
-    }
-
-    const juce::juce_wchar ch = key.getTextCharacter();
-    if (ch == 'c' || ch == 'C')
-    {
-        calibrationMode = ! calibrationMode;
-        repaint();
-        return true;
-    }
-
-    return false;
+    calibrationMode = on;
+    repaint();
 }
 
 void FullscreenColorWindow::paint (juce::Graphics& g)
@@ -165,13 +140,19 @@ void FullscreenColorWindow::paintCalibration (juce::Graphics& g)
     const int  w      = bounds.getWidth();
     const int  h      = bounds.getHeight();
 
+    // Hue arc currently selected (271° spectral arc or 360° wrap — TEST TOGGLE),
+    // so the palette matches whatever the live display is using.
+    const float hueRange = processor.getHueRange();
+    const bool  wrap     = processor.isHueWrap();
+
     // 12 vertical stripes across the full width.
     const float stripeW = static_cast<float> (w) / 12.0f;
 
     for (int i = 0; i < 12; ++i)
     {
-        const auto& s = kCalibrationSwaras[i];
-        const OKLCH c { kCalibrationL, kCalibrationC, s.hue_deg };
+        const float phase = static_cast<float> (i) / 12.0f;
+        const float hue   = std::fmod (ColorEngine::HUE_MIN + phase * hueRange, 360.0f);
+        const OKLCH c { kCalibrationL, kCalibrationC, hue };
         g.setColour (toJuceColour (c));
         g.fillRect (juce::Rectangle<float> (i * stripeW, 0.0f, stripeW, static_cast<float> (h)));
     }
@@ -195,20 +176,24 @@ void FullscreenColorWindow::paintCalibration (juce::Graphics& g)
 
     for (int i = 0; i < 12; ++i)
     {
-        const auto& s = kCalibrationSwaras[i];
         const juce::Rectangle<int> box (static_cast<int> (i * stripeW), h / 2 - 30,
                                          static_cast<int> (stripeW), 60);
-        drawLabel (juce::String (s.name), box);
+        drawLabel (juce::String (kSwaraNames[i]), box);
     }
 
     // Header and footer hints.
     const juce::Font hintFont (juce::Font::getDefaultMonospacedFontName(), 18.0f, juce::Font::plain);
     g.setFont (hintFont);
 
-    drawLabel ("Calibration palette  |  press C to return  |  Esc to exit fullscreen",
+    drawLabel (juce::String ("Calibration palette  ·  hue arc: ") + (wrap ? "360 wrap" : "271 spectral")
+                   + "   ·   use the plugin window to exit / switch arc / return to live color",
                juce::Rectangle<int> (0, h - 50, w, 30));
-    drawLabel ("Verify: Sa = pure red,  Pa = cyan,  Dha = blue,  Ni = violet "
-               "(if these look warm/off, disable Night Shift, True Tone, and f.lux)",
+
+    // Expected anchors differ by mode (TEST TOGGLE). Sa = pure red in both.
+    const juce::String verify = wrap
+        ? "Verify: Sa = red,  Ma = cyan,  Pa = blue,  Dha = purple,  Ni = pink-red"
+        : "Verify: Sa = red,  Pa = cyan,  Dha = blue,  Ni = violet";
+    drawLabel (verify + "   (warm/off? disable Night Shift, True Tone, f.lux)",
                juce::Rectangle<int> (0, 20, w, 30));
 }
 

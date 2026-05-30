@@ -90,7 +90,7 @@ The majority of induction studies have used grapheme-color (letter-color) synest
 
 The key empirical study of natural pitch-class-color synesthesia — Itoh, Sakata, Kwee, & Nakada (2017, *Scientific Reports*) — found something important that complicates this:
 
-> In 15 individuals with confirmed pitch-class color synesthesia, **color was predominantly determined by the verbal label of the note** (do, re, mi…), **not raw acoustic frequency**, for 13 of the 15 participants. Enharmonic pitches (e.g., C♯ vs. D♭) at identical frequency produced *different* colors depending on the name the synesthete used. The two remaining participants reported more direct pitch-color associations. The proposed mechanism for the majority is two-step: pitch → name → color.
+> In 15 individuals with confirmed pitch-class color synesthesia, **color was predominantly determined by the verbal label of the note** (do, re, mi…), **not raw acoustic frequency**, for 13 of the 15 participants. Enharmonic pitches (e.g., C♯ vs. D♭) at identical frequency produced *different* colors depending on the name the synesthete used. The remaining two did not explicitly report this name-linkage; the two-step account rests on the 13/15 majority. The proposed mechanism is two-step: pitch → (via absolute pitch) note name → color.
 
 This is significant for the project's design. In Itoh et al.'s sample, pitch-class-color synesthesia was predominantly name-mediated (though individual mechanisms vary). A continuous frequency-based mapping does not implement that mechanism. See §4 for how this experiment addresses this — partly by leveraging Hindustani solfège, partly by deliberately and self-consciously departing from Itoh's finding.
 
@@ -132,7 +132,7 @@ The mapping *function* is continuous in frequency: `phase = log₂(f / 17.3239 H
 
 **Important caveat on implementation continuity:** The mapping function is continuous, but the *displayed* color is only as continuous as the *pitch input*. Standard MIDI note input is discrete 12-TET; the display therefore steps from swara to swara without intermediate colors. Continuous color sweeps require continuous pitch data — supplied via **MIDI pitch bend**, **MPE**, a **ribbon controller** or other continuous controller, or future **audio pitch tracking** of the practitioner's voice. With vanilla MIDI note-on/note-off, the practitioner gets a faithful per-swara color but no color trajectory during meend or gamaka. See §4.3 for practical implications.
 
-**Caveat on the hue arc — the octave boundary is a discontinuity:** The hue cycle spans **271°** (red 29° → violet 300°), not a full 360° circle. Within each octave the named swaras run Sa (red, 29°) → Ni (violet, 277°); the octave boundary is therefore a hue *discontinuity*. A continuous glide from Ni up to the next Sa runs 277° → ~300° (purple, where no named swara lives) and then snaps ~89° back to red at the octave. This is invisible with 12-TET MIDI or ±2-semitone pitch bend — no note lands in that arc — and only manifests with octave-spanning continuous input (MPE, ribbon, or future audio pitch tracking). The 271° span is a deliberate choice rather than an oversight; see §3.8 for why a full 360° wrap was rejected.
+**Caveat on the hue arc — the octave boundary is a discontinuity:** The hue cycle spans **271°** (red 29° → violet 300°), not a full 360° circle. Within each octave the named swaras run Sa (red, 29°) → Ni (violet, 277°); the octave boundary is therefore a hue *discontinuity*. A continuous glide from Ni up to the next Sa runs *forward* through 277° → ~300° (purple/magenta, where no named swara lives — it does not retrace the rainbow backward) and then snaps ~89° to pure red at the instant the pitch reaches Sa. Lightness moves continuously and negligibly across this glide (≈0.674 → 0.683); only hue is discontinuous. With *discrete* note-on/note-off the artifact never appears — Ni and Sa are simply two static colors (violet, red). It manifests whenever *continuous* pitch input crosses the boundary, and an ordinary ±2-semitone pitch bend suffices (bend Ni up one semitone to Sa), as do MPE, a ribbon, or future audio pitch tracking. Because **Ni→Sa is one of the most common resolutions in Hindustani phrasing**, this glide will be encountered often once continuous input is in use. The 271° span is nonetheless a deliberate choice rather than an oversight; see §3.8 for why a full 360° wrap was rejected.
 
 This continuous-mapping design (whether or not always exercised continuously) is **a deliberate departure from Itoh's name-mediated finding**, and the central hypothesis the experiment tests. Two reasons motivate this choice for this subject:
 
@@ -261,13 +261,13 @@ Because the practice involves tanpura drone, training keyboard, and voice — po
 
 ### 4.3 Practice Structure
 
-The plugin renders a borderless fullscreen color on a secondary display while the DAW is operated on the primary. When fullscreen is engaged, the plugin's in-DAW editor collapses to a thin status bar (so the primary monitor stays clean during practice); pressing **Esc** on the fullscreen window restores the full editor. The practice session uses both a MIDI keyboard (providing reference swara pitches on the training channel) and the practitioner's voice. Tanpura runs separately as described in §4.2.
+The plugin renders a borderless fullscreen color on a secondary display while the DAW is operated on the primary. When fullscreen is engaged, the plugin's in-DAW editor collapses to a compact control bar on the primary monitor (so it stays clean during practice); clicking **Exit Fullscreen** there restores the full editor. The color window takes **no keyboard focus**, so the computer keyboard stays available for use as a MIDI input in the host. The practice session uses both a MIDI keyboard (providing reference swara pitches on the training channel) and the practitioner's voice. Tanpura runs separately as described in §4.2.
 
-**Display calibration check (recommended at the start of every session):** with the fullscreen window active, press **C** to toggle a 12-stripe palette showing all swara reference colors with labels at madhya-saptak lightness. Verify Sa = pure red, Pa = cyan, Dha = blue, Ni = violet. If any look warm or off-spectrum, a display warming feature is still active (Night Shift, True Tone, auto-brightness, or third-party warmth — see README "Display Setup"). Press **C** again to return to live color.
+**Display calibration check (recommended at the start of every session):** with fullscreen active, click the **Calibration** button in the control bar to toggle a 12-stripe palette showing all swara reference colors with labels at madhya-saptak lightness. Verify Sa = pure red, Pa = cyan, Dha = blue, Ni = violet. If any look warm or off-spectrum, a display warming feature is still active (Night Shift, True Tone, auto-brightness, or third-party warmth — see README "Display Setup"). Click **Live color** to return.
 
 Suggested daily session:
 
-0. **Calibration check (10 s)**: press `C` on the fullscreen window; eyeball the 12-stripe palette; press `C` again. Confirms display is rendering hues correctly before training.
+0. **Calibration check (10 s)**: click **Calibration** in the control bar; eyeball the 12-stripe palette; click **Live color**. Confirms display is rendering hues correctly before training.
 1. **Warm-up (5 min)**: Tanpura (separate channel) on Sa; play and sing held Sa, Pa, upper Sa while watching the color settle. Build association between the vocalized name + the held pitch + the color.
 2. **Aroha–avaroha (10 min)**: Slowly ascend and descend the chosen raga's scale, vocalizing each swara and watching the color step. Try to mentally pre-image the color before playing the next note.
 3. **Alankars / paltas (10 min)**: Standard ornamental scale exercises. The point is consistent repetition of swara-color pairings.
@@ -485,3 +485,99 @@ sRGB(x) = x ≤ 0.0031308 ? 12.92·x : 1.055·x^(1/2.4) − 0.055
 ```
 
 Reference: Ottosson (2020) for the matrices; Ottosson (2021) for the gamut-clipping discussion; W3C CSS Color Module Level 4 for the gamut mapping algorithm.
+
+---
+
+## Appendix C: Alternative Hue-Arc Designs (Spectral Arc vs. Full 360° Wrap)
+
+This appendix documents the design space around the hue arc — the choice (§3.2, §3.8) to span **271°** (red → violet) rather than the full 360° hue wheel — and the octave-boundary discontinuity it produces (§3.3). It exists so the spectral-fidelity argument can be examined in full before the mapping is locked, since the mapping must never change once training begins (§2.2, §4.1).
+
+### C.1 The real constraint: spectral fidelity and octave-continuity cannot coexist
+
+A design requirement is **pitch-class color constancy**: every Sa is red, every Re red-orange, etc., *regardless of octave*. Pitch class sets hue; pitch height sets only lightness (§3.4). So hue is a function of `phase = log₂(f/f_ref) mod 1`, and `phase` is **circular** — phase 0 and phase 1 are the same pitch class and must receive the same color. We also want each swara to be a **distinct** hue (injectivity) and hue to **increase monotonically** with phase (a clean rainbow, not a zig-zag).
+
+The governing fact is topological, not aesthetic: **a continuous, injective map from a circle onto a proper sub-arc is impossible.** Pitch class is a circle. If hue is confined to a sub-arc of the wheel (e.g. the 271° spectral band, never entering the purples), the map cannot be both continuous *and* one-color-per-swara — it must either jump (a discontinuity) or repeat a color (two swaras share a hue). To get continuity *and* distinct colors, the map must wind once around the **entire** hue circle.
+
+So the honest framing — correcting an overstatement in the first draft of this appendix — is **not** "a discontinuity is unavoidable." It is:
+
+> **You can have continuity (no seam) OR spectral fidelity (hue confined to the red→violet arc), but not both.**
+
+- **271° arc**: confines hue to the spectral band, leaving 89° of the wheel (the purples) unused → the octave crossing must jump that 89°. Spectral fidelity, bought with a seam.
+- **360° wrap**: winds the full circle through the purples → the octave crossing is a literal once-around rotation, continuous mod 360 → **no seam at all**. Continuity, bought with the purples.
+
+The 360° wrap does not merely *shrink* the seam — it **eliminates** it. Continuity is genuinely achievable; the seam exists in the 271° design *only because* that design declines to use 89° of the wheel. (Which 89° that is, and why it matters, is §C.3.)
+
+### C.2 The two principled endpoints, per swara
+
+`H_271 = 29 + 271·phase`  vs.  `H_360 = (29 + 360·phase) mod 360`:
+
+| Swara | phase | H (271° arc) | Color (271°) | H (360° wrap) | Color (360°) |
+|---|---|---|---|---|---|
+| Sa | 0/12 | 29° | red | 29° | red |
+| re | 1/12 | 52° | red-orange | 59° | orange |
+| Re | 2/12 | 74° | orange | 89° | yellow |
+| ga | 3/12 | 97° | yellow | 119° | yellow-green |
+| Ga | 4/12 | 119° | yellow-green | 149° | green |
+| Ma | 5/12 | 142° | green | 179° | cyan/teal |
+| MA | 6/12 | 165° | teal | 209° | sky blue |
+| Pa | 7/12 | 187° | **cyan** | 239° | **blue** |
+| dha | 8/12 | 210° | light blue | 269° | blue-violet |
+| Dha | 9/12 | 232° | blue | 299° | **purple** |
+| ni | 10/12 | 255° | indigo | 329° | **magenta** |
+| Ni | 11/12 | 277° | **violet** | 359° | **pink-red** |
+
+What the wrap changes: the per-swara step widens 22.6° → 30° (more separation), and Ni (359°) lands ~30° from the next Sa (29°) — octave-circular, no snap. But **cyan vanishes from Pa** (it migrates down to Ma), and **the top three swaras (Dha, ni, Ni) move into purple → magenta → pink** — the non-spectral region.
+
+### C.3 The spectral argument, in full
+
+**The crux, stated as plainly as possible: the 89° the 271° arc declines to use, and the 89° jump at the octave, are the *same* 89°.** The arc runs red (29°) → violet (300°); the unused remainder runs 300° → 360° → 29°, i.e. **purple → magenta → pink → red**. Those are precisely the *non-spectral* hues — the **"line of purples"** on the CIE chromaticity diagram, which correspond to *no single wavelength* of light, only to mixtures of long- and short-wavelength light. The spectral locus (the curve of monochromatic colors) is an **open arc**; it is closed into a circle only by this purple line.
+
+So three statements are identical:
+- "Display only spectral-side hues" =
+- "Refuse to traverse the line of purples" =
+- "Leave an 89° gap in the hue wheel" = **the octave snap.**
+
+You cannot remove the snap without entering the purples; you cannot enter the purples without abandoning spectral fidelity. One decision, two faces.
+
+**Honesty caveat — what 'spectral fidelity' does *not* mean.** The screen does *not* display real monochromatic light; it can't. The sRGB gamut is a triangle well *inside* the spectral locus — sRGB's most saturated "violet" and "cyan" are far less pure than true 450 nm or 490 nm light, and the deepest spectral violets are unreproducible. So the argument is about hue **region/direction**, not literal wavelength: the 271° arc keeps every swara on the **spectral side** of hue space (the nameable rainbow red→orange→yellow→green→cyan→blue→violet); the 360° wrap routes the upper swaras onto the **non-spectral side** (purple→magenta→pink). Both render in sRGB — the question is which *family* of hues each pitch is assigned.
+
+**The strongest case for the 360° wrap.** The pitch→color link is an *analogy*, not physics. An octave of sound is not literally an octave of light — the visible band is in fact slightly *under* one octave wide in light-frequency terms (~380–700 nm ≈ 1.84:1 ≈ 0.9 octave), and no claim is made that a swara's color is its acoustic overtone. If the mapping is conventional anyway, why privilege the physical spectrum over topology? Pitch class is *genuinely* circular (octave equivalence is among the most robust facts in pitch perception); the hue circle is *genuinely* circular; mapping circle→circle (360°) is the topologically honest choice *and* removes the seam (C.1). This is a serious argument, not a strawman.
+
+**Why the project nonetheless keeps the 271° arc.** Three *independent* arguments converge on it:
+
+1. **Empirical (Itoh).** Itoh et al.'s synesthetes show a linear red→violet rainbow (do = red, si = violet); the leading tone does **not** return toward red. The 271° arc reproduces the one dataset we have; the 360° wrap contradicts it.
+2. **Perceptual distinctness / nameability.** The rainbow hues (red, orange, yellow, green, cyan, blue, violet) have strong, near-universal cross-observer naming and spread *widely* across nameable-color space. The non-spectral purples (purple/magenta/fuchsia/pink) occupy a smaller, more compressed, less consistently-named band. For a task whose entire point is forming *distinct, stable, nameable* pitch-color bindings, the spectral arc yields 12 maximally-separable, individually-nameable targets; the wrap bunches three of them into the purples.
+3. **Loss of cyan and violet as anchors.** In the wrap, Pa → blue (cyan migrates to Ma) and Dha/ni/Ni → purple/magenta/pink. Cyan and violet — two of the most perceptually distinctive hues — stop labelling specific swaras.
+
+That physics, perception, and the lone empirical dataset *all* point the same way is why the seam is judged an acceptable price — especially since it is invisible under discrete and ±2-semitone-bend play and surfaces only on continuous octave-crossing glides (§3.3).
+
+**An honest counterweight (added after re-reading Itoh).** This is not a slam-dunk for the arc, and two caveats cut the other way. First, **Itoh constrains the *discrete arrangement*, not continuous glides.** His synesthetes color 12 pitch *classes* and place the leading tone (si) at violet and the tonic (do) at red — far apart — which does argue against making Ni and Sa similar colors. But natural pitch-class synesthetes do not experience continuous color *glides* at all (their associations are discrete and name-mediated), so Itoh is simply silent on what a meend across the octave should do. The wrap's one genuine advantage — smooth octave-crossing glides — lies in a regime Itoh cannot adjudicate. Second, **the brain's own color representation is a circle** (opponent-process hue: red–green and blue–yellow axes, with hue as the angle), so mapping the circular pitch-class space onto the circular hue space is arguably the more *neurally* natural target for an induced association — a point that cuts *toward* the wrap. And the spectral-fidelity argument, real as it is, is partly aesthetic: a conditioning brain cares about distinct, consistent, nameable colors, not whether a hue corresponds to a single wavelength. Net: the arc is the better-evidenced default for the **discrete** training that begins the protocol; the 360° wrap is a legitimate choice if octave-circularity matters to the practitioner's phenomenology and continuous input is expected early.
+
+### C.4 The middle path — easing the seam (documented, not recommended)
+
+A hybrid keeps the 271° spectral arc for the body of each octave but smooths the seam by compressing the reset into a narrow transition zone — e.g. over the last ~20–30 cents below Sa, sweep hue quickly violet → purple → red instead of cutting instantly. This trades the instantaneous 89° jump for a fast-but-continuous transition.
+
+Attractive for an *aesthetic* visualizer; poor for a *training* tool:
+- The transition-zone colors (a rapid violet→purple→magenta→red sweep) are themselves non-spectral and arbitrary — you have reintroduced the purples, merely compressed into a few cents.
+- It creates a region of **highly nonlinear hue velocity**: near the octave a tiny pitch change yields a large hue change, so the pitch→hue slope is no longer constant — undermining the "each pitch has one stable, predictable color" property the protocol depends on, and doing so *precisely at Sa*, the most important pitch.
+- It only matters under continuous input — exactly the case where you'd be trying to read a stable color off a glide.
+
+Documented for completeness; **not recommended** — it muddies the tonic's color to fix a cosmetic seam that discrete play never shows.
+
+### C.5 Recommendation and how to switch
+
+**Recommendation (qualified): default to the 271° spectral arc for the discrete training that begins the protocol.** It matches how natural synesthetes arrange the 12 classes (Itoh: leading tone far from tonic), keeps cyan and violet as distinct swara anchors, and the seam is invisible under discrete and ±2-semitone-bend play. **But this is a values choice, not a correctness one** (see the C.3 counterweight): if octave-circularity matters to the practitioner's phenomenology, or continuous (MPE / audio-pitch) input is expected early, the 360° wrap is fully defensible — it honors the genuine octave-circularity of pitch, maps onto the brain's own circular hue geometry, and removes the seam entirely. The Ni→Sa snap-to-red, if the arc is kept, is at least arguably *meaningful* as a tonic-arrival cue (§3.3).
+
+If, after the above, octave-circularity is judged more important than spectral fidelity, the switch is a **one-line change** to `ColorEngine.h`:
+
+```cpp
+// 271° spectral arc (current): red → violet; 89° octave seam; spectral-side hues only
+static constexpr float HUE_RANGE = 271.0f;
+
+// 360° perceptual wrap: continuous across octaves; traverses non-spectral purples
+static constexpr float HUE_RANGE = 360.0f;
+```
+
+With 360° you must also update the calibration-palette hues in `FullscreenColorWindow.cpp` and the swara tables here and in the README — every swara above Sa changes hue (see C.2).
+
+**This decision must be made before the week-0 baseline and never revisited mid-training** — mapping stability is the load-bearing variable (§2.2, §4.1). Pick one arc, lock it, pre-register it.

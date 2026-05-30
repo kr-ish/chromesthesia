@@ -60,10 +60,18 @@ void ChromesthesiaProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
 void ChromesthesiaProcessor::updateColor (float freq, int velocity) noexcept
 {
-    const OKLCH c = ColorEngine::frequencyToOKLCH (freq, velocity);
+    const OKLCH c = ColorEngine::frequencyToOKLCH (freq, velocity, hueRange.load());
     atomicH.store (c.H);
     atomicL.store (c.L);
     atomicC.store (c.C);
+}
+
+void ChromesthesiaProcessor::setHueWrap (bool wrap) noexcept
+{
+    hueRange.store (wrap ? ColorEngine::HUE_RANGE_WRAP : ColorEngine::HUE_RANGE);
+    // Recompute the held color now so the toggle is visible immediately, even
+    // while a note is sustained.
+    updateColor (currentFreq.load(), currentVelocity.load());
 }
 
 juce::AudioProcessorEditor* ChromesthesiaProcessor::createEditor()

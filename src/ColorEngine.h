@@ -38,14 +38,21 @@ class ColorEngine {
 public:
     static constexpr float F_REF      = 17.3239f;  // C#0 (Sa, Hindustani scale C#)
     static constexpr float HUE_MIN    = 29.0f;     // OKLCH hue for red (Sa)
-    static constexpr float HUE_RANGE  = 271.0f;    // red → violet span
+    static constexpr float HUE_RANGE  = 271.0f;    // red → violet spectral arc
+    // TEST TOGGLE (temporary): 360° octave-wrapping arc, compared live against
+    // the 271° spectral arc. Remove with the toggle once the arc is chosen —
+    // see docs/science.md Appendix C.
+    static constexpr float HUE_RANGE_WRAP = 360.0f;
     static constexpr float CHROMA_MIN = 0.12f;
     static constexpr float CHROMA_MAX = 0.18f;     // safely in sRGB gamut for
                                                     // most hue/L combinations
 
     // Compute display color from audio frequency and MIDI velocity (0–127).
     // Returns black (L=0, C=0) if freq <= 0.
-    static OKLCH frequencyToOKLCH(float freq_hz, int velocity_0_127) noexcept;
+    // hue_range selects the hue arc: HUE_RANGE (271° spectral) or
+    // HUE_RANGE_WRAP (360° octave wrap, test toggle). Hue is taken mod 360.
+    static OKLCH frequencyToOKLCH(float freq_hz, int velocity_0_127,
+                                  float hue_range = HUE_RANGE) noexcept;
 
     // Convert OKLCH to sRGB using Ottosson's exact matrices, with CSS Color 4
     // gamut mapping (chroma reduction at constant L and H) for out-of-gamut

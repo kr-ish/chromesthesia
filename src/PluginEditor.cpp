@@ -28,14 +28,37 @@ ChromesthesiaEditor::ChromesthesiaEditor (ChromesthesiaProcessor& p)
     fullscreenButton.onClick = [this] { toggleFullscreen(); };
     addAndMakeVisible (fullscreenButton);
 
+    // TEST TOGGLE (temporary): 271° spectral arc vs 360° octave wrap. Switch is
+    // button-only. Remove once the hue arc is chosen — see docs/science.md
+    // Appendix C.
+    hueModeButton.onClick = [this]
+    {
+        proc.setHueWrap (! proc.isHueWrap());
+        updateHueModeButton();
+        if (colorWindow) colorWindow->refresh(); // repaint palette if it is up
+    };
+    addAndMakeVisible (hueModeButton);
+    updateHueModeButton();
+
+    // Calibration palette toggle. Driven here (not by a fullscreen key) so the
+    // color window never needs keyboard focus. Shown only while fullscreen.
+    calibrationButton.setButtonText ("Calibration");
+    calibrationButton.onClick = [this]
+    {
+        const bool on = ! colorWindow->isCalibration();
+        colorWindow->setCalibration (on);
+        calibrationButton.setButtonText (on ? "Live color" : "Calibration");
+    };
+    addChildComponent (calibrationButton); // hidden until fullscreen
+
     // Note label
     noteInfoLabel.setJustificationType (Justification::centredLeft);
     noteInfoLabel.setFont (Font (Font::getDefaultMonospacedFontName(), 13.0f, Font::plain));
     addAndMakeVisible (noteInfoLabel);
 
-    // Create window now (hidden); it will be shown on demand.
+    // Create window now (hidden); it will be shown on demand. It takes no
+    // keyboard focus — all controls are the buttons above.
     colorWindow = std::make_unique<FullscreenColorWindow> (proc);
-    colorWindow->onEscapeRequested = [this] { exitFullscreen(); };
 
     startTimerHz (30);
 }
@@ -71,30 +94,36 @@ void ChromesthesiaEditor::resized()
     titleLabel.setBounds (area.removeFromTop (28));
     area.removeFromTop (6);
 
-    // Control row
-    auto controlRow = area.removeFromTop (26);
-
-    if (! isFullscreen)
+    if (isFullscreen)
     {
-        displayLabel  .setBounds (controlRow.removeFromLeft (60));
-        controlRow.removeFromLeft (6);
-        displayCombo  .setBounds (controlRow.removeFromLeft (180));
-        controlRow.removeFromLeft (8);
+        // Compact control bar — everything reachable without the keyboard.
+        auto row = area.removeFromTop (26);
+        fullscreenButton .setBounds (row.removeFromLeft (116));
+        row.removeFromLeft (6);
+        calibrationButton.setBounds (row.removeFromLeft (100));
+        row.removeFromLeft (6);
+        hueModeButton    .setBounds (row.removeFromLeft (124));
+        swatchBounds = {};
+        return;
     }
+
+    // Windowed layout.
+    auto controlRow = area.removeFromTop (26);
+    displayLabel    .setBounds (controlRow.removeFromLeft (60));
+    controlRow.removeFromLeft (6);
+    displayCombo    .setBounds (controlRow.removeFromLeft (180));
+    controlRow.removeFromLeft (8);
     fullscreenButton.setBounds (controlRow.removeFromLeft (140));
 
-    if (! isFullscreen)
-    {
-        area.removeFromTop (10);
-        auto bottomRow = area.removeFromTop (70);
-        swatchBounds = bottomRow.removeFromLeft (70);
-        bottomRow.removeFromLeft (12);
-        noteInfoLabel.setBounds (bottomRow);
-    }
-    else
-    {
-        swatchBounds = {};
-    }
+    area.removeFromTop (8);
+    auto hueRow = area.removeFromTop (26);          // TEST TOGGLE row
+    hueModeButton.setBounds (hueRow.removeFromLeft (200));
+
+    area.removeFromTop (10);
+    auto bottomRow = area.removeFromTop (70);
+    swatchBounds = bottomRow.removeFromLeft (70);
+    bottomRow.removeFromLeft (12);
+    noteInfoLabel.setBounds (bottomRow);
 }
 
 //==============================================================================
@@ -135,13 +164,14 @@ void ChromesthesiaEditor::enterFullscreen()
     colorWindow->showOnDisplay (selectedIndex);
 
     fullscreenButton.setButtonText ("Exit Fullscreen");
-    titleLabel.setText ("Chromesthesia  —  fullscreen active (Esc to exit, C for palette)",
-                        juce::dontSendNotification);
+    titleLabel.setText ("Chromesthesia — fullscreen", juce::dontSendNotification);
 
-    // Hide the bits that are irrelevant while fullscreen is up.
+    // Hide windowed-only widgets; keep the control buttons reachable.
     displayLabel  .setVisible (false);
     displayCombo  .setVisible (false);
     noteInfoLabel .setVisible (false);
+    calibrationButton.setButtonText ("Calibration");
+    calibrationButton.setVisible (true);   // shown only while fullscreen
 
     isFullscreen = true;
     setSize (W, H_MINIMIZED);  // triggers resized()
@@ -151,7 +181,7 @@ void ChromesthesiaEditor::exitFullscreen()
 {
     if (! isFullscreen) return;
 
-    colorWindow->hide();
+    colorWindow->hide();   // also clears calibration mode
 
     fullscreenButton.setButtonText ("Go Fullscreen");
     titleLabel.setText ("Chromesthesia", juce::dontSendNotification);
@@ -159,9 +189,17 @@ void ChromesthesiaEditor::exitFullscreen()
     displayLabel  .setVisible (true);
     displayCombo  .setVisible (true);
     noteInfoLabel .setVisible (true);
+    calibrationButton.setVisible (false);  // only relevant in fullscreen
 
     isFullscreen = false;
     setSize (W, H);  // triggers resized()
+}
+
+void ChromesthesiaEditor::updateHueModeButton()
+{
+    // TEST TOGGLE (temporary) — remove with the toggle once the arc is chosen.
+    hueModeButton.setButtonText (proc.isHueWrap() ? "Hue arc: 360 wrap"
+                                                  : "Hue arc: 271 spectral");
 }
 
 juce::String ChromesthesiaEditor::noteLabel() const

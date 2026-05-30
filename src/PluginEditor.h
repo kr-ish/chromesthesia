@@ -31,6 +31,7 @@ private:
     void toggleFullscreen();
     void enterFullscreen();
     void exitFullscreen();
+    void updateHueModeButton();   // TEST TOGGLE
     juce::String noteLabel() const;
 
     ChromesthesiaProcessor& proc;
@@ -39,6 +40,8 @@ private:
     juce::Label      displayLabel;
     juce::ComboBox   displayCombo;
     juce::TextButton fullscreenButton;
+    juce::TextButton hueModeButton;     // TEST TOGGLE: 271° arc vs 360° wrap
+    juce::TextButton calibrationButton; // calibration palette (fullscreen only)
 
     // Swatch: just a painted rectangle, updated via repaint().
     juce::Rectangle<int> swatchBounds;
@@ -48,8 +51,8 @@ private:
     bool isFullscreen { false };
 
     static constexpr int W           = 380;
-    static constexpr int H           = 180;
-    static constexpr int H_MINIMIZED = 80;  // height when fullscreen is active
+    static constexpr int H           = 212;  // includes the hue-mode test toggle row
+    static constexpr int H_MINIMIZED = 96;   // compact control bar when fullscreen
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChromesthesiaEditor)
 };

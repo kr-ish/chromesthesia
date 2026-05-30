@@ -101,7 +101,7 @@ Chromesthesia is a silent instrument — it receives MIDI and drives the color d
 4. In the Chromesthesia plugin UI, select your practice display from the **Display** dropdown.
 5. Click **Go Fullscreen** — the color window opens on your chosen screen; the plugin UI collapses to a thin status bar.
 6. Play notes — the screen fills with the associated color; releasing a note fades to black over ~500 ms.
-7. Press **Esc** on the fullscreen window to exit (the plugin UI reappears), or press **C** to toggle the calibration palette.
+7. To return, click **Exit Fullscreen** in the plugin window (it stays visible on your primary screen as a compact control bar). The **Calibration** button toggles the reference palette. The color window takes no keyboard focus, so your computer keyboard stays free for use as a MIDI input in the host.
 
 ---
 
@@ -122,7 +122,7 @@ The plugin's hue mapping assumes a neutral display white point (~D65 / 6500 K). 
 
 **Room lighting — dim, not dark.** Two reasons against pitch-black training: (1) **generalization risk** — an association trained only in a dark room may become context-bound to "dark room" and fail to fire when you hear music in normal light. The Nair & Brang (2019) result you may have seen cited for dark adaptation used 5 min of darkness as an *acute facilitation*, not a chronic training condition. (2) **Operational** — you need to see the keyboard and your hands. Dim the room enough that the fullscreen color dominates peripheral vision and isn't competing with bright lights or windows; keep a small warm-toned task light on the keyboard if needed. **Practice ~80% of sessions in dim conditions, ~20% in normal room light** to train cross-context generalization. Log which condition each session was in (one extra line in your journal) so you can stratify B1/B2 results at the retest.
 
-**Verify with the built-in calibration palette:** press **C** in fullscreen mode to toggle a 12-stripe palette showing all swara reference colors with labels. Sa should look pure red, Pa cyan, Dha blue, Ni violet. If anything looks warm or off-spectrum, one of the settings above is still active. Press **C** again to return to live color, or **Esc** to exit fullscreen.
+**Verify with the built-in calibration palette:** while fullscreen is active, click the **Calibration** button in the plugin's control bar to toggle a 12-stripe palette showing all swara reference colors with labels. Sa should look pure red, Pa cyan, Dha blue, Ni violet. If anything looks warm or off-spectrum, one of the settings above is still active. Click **Live color** to return, or **Exit Fullscreen** to leave.
 
 ---
 

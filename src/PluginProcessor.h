@@ -53,6 +53,13 @@ public:
     float getCurrentFrequency() const noexcept { return currentFreq.load(); }
     int   getCurrentMidiNote()  const noexcept { return currentNote.load(); }
 
+    // TEST TOGGLE (temporary): compare the 271° spectral arc against the 360°
+    // octave-wrapping arc live. Remove once the hue arc is chosen — see
+    // docs/science.md Appendix C.
+    void  setHueWrap (bool wrap) noexcept;
+    bool  isHueWrap()   const noexcept { return hueRange.load() > 315.0f; }
+    float getHueRange() const noexcept { return hueRange.load(); }
+
 private:
     // Note state — written on audio thread, read on message thread.
     std::atomic<int>   currentNote     { -1 };
@@ -60,6 +67,7 @@ private:
     std::atomic<float> currentFreq     { 0.0f };
     std::atomic<bool>  noteHeld        { false };
     std::atomic<float> pitchBendST     { 0.0f }; // pitch bend in semitones
+    std::atomic<float> hueRange        { ColorEngine::HUE_RANGE }; // TEST TOGGLE
 
     // Current display color (packed as three floats).
     std::atomic<float> atomicH { ColorEngine::HUE_MIN };
